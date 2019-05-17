@@ -11,7 +11,7 @@ import numpy
 import os
 
 
-quantization_luminence_matrix = numpy.array([
+quantization_luminance_matrix = numpy.array([
   [16,  11,  10,  16,  24,  40,  51,  61],
   [12,  12,  14,  19,  26,  58,  60,  55],
   [14,  13,  16,  24,  40,  57,  69,  56],
@@ -33,14 +33,31 @@ quantization_chrominance_matrix = numpy.array([
   [99,  99,  99,  99,  99,  99,  99,  99]])
 
 
+def test_hiding_row_by_row(block, message):
+    print(block)
+    data1 = numpy.int8(block)
+    print(message)
+    for i in range(0, 8):
+        for j in range(0, 8):
+            if len(message) > 0:
+                char = int(message[0])
+                block[i, j] += char
+                message = message[1:]
+            else:
+                break
+    data2 = numpy.int8(block)
+    toimage(data1).show()
+    toimage(data2).show()
+    print(block)
+
+
 def text_to_bits(text):
     bit_array = bitarray()
     bit_array.frombytes(text.encode("utf-8"))
     return bit_array.to01()
 
 
-def image_is_grayscale(image):
-    print image.shape
+def image_is_greyscale(image):
     return len(image.shape) == 2
 
 
@@ -53,9 +70,9 @@ def image_to_rgb(image):
 
 def rgb_to_image(r, g, b):
     image = numpy.ndarray((r.shape[0], r.shape[1], 3))
-    image[:, :, 0] = r
-    image[:, :, 2] = g
-    image[:, :, 1] = b
+    image[:, :, 2] = r
+    image[:, :, 1] = g
+    image[:, :, 0] = b
     return image
 
 
@@ -67,7 +84,7 @@ def rgb_to_ycbcr(r, g, b):
 
 
 #https://web.archive.org/web/20180421030430/http://www.equasys.de/colorconversion.html
-def ycrcb_to_rgb(y, cr, cb):
+def ycbcr_to_rgb(y, cb, cr):
     cr -= 128
     cb -= 128
     r = y + 1.402 * cr
@@ -88,36 +105,24 @@ def inverse_dct_transformation(block):
     return result
 
 
-def quantizise_luminence(block):
-    return numpy.around(block / quantization_luminence_matrix)
+def quantize_luminance(block):
+    return numpy.around(block / quantization_luminance_matrix)
 
 
-def quantizise_chrominance(block):
+def quantize_chrominance(block):
     return numpy.around(block / quantization_chrominance_matrix)
 
 
-def test_hiding_row_by_row(block, message):
-    print(block)
-    data1 = numpy.int8(block)
-    print(message)
-    for i in range(0, 8):
-        for j in range(0, 8):
-            if len(message) > 0:
-                char = int(message[0])
-                block[i, j] += char
-                message = message[1:]
-            else:
-                break
-    data2 = numpy.int8(block)
-    toimage(data1).show()
-    toimage(data2).show()
-    print(block)
+def dequantize_luminance(block):
+    return block * quantization_luminance_matrix
 
 
-def compress_grayscale_image(image):
-    result = compress(image, True)
-    data = numpy.int8(result)
-    return result
+def dequantize_chrominance(block):
+    return block * quantization_chrominance_matrix
+
+
+def compress_greyscale_image(image):
+    return compress(image, True)
 
 
 def compress_colour_image(image):
@@ -125,10 +130,19 @@ def compress_colour_image(image):
     y, cb, cr = rgb_to_ycbcr(r, g, b)
     y, cb, cr = compress(y, True), compress(cb, False), compress(cr, False)
     result = numpy.empty_like(image)
-    result[:, :, 0] = y
-    result[:, :, 1] = cb
-    result[:, :, 2] = cr
+    result[:, :, 0], result[:, :, 1], result[:, :, 2] = y, cb, cr
     return result
+
+
+def decompress_greyscale_image(compressed_image):
+    return decompress(compressed_image, True)
+
+
+def decompress_colour_image(compressed_image):
+    y, cb, cr = compressed_image[:, :, 0], compressed_image[:, :, 1], compressed_image[:, :, 2]
+    y, cb, cr = decompress(y, True), decompress(cb, False), decompress(cr, False)
+    r, g, b = ycbcr_to_rgb(y, cb, cr)
+    return rgb_to_image(r, g, b)
 
 
 #https://inst.eecs.berkeley.edu/~ee123/sp16/Sections/JPEG_DCT_Demo.html
@@ -140,24 +154,24 @@ def compress(image, is_grayscale):
         for j in r_[:image_size[1]:8]:
             compressed_image[i:(i + 8), j:(j + 8)] = dct_transformation(image[i:(i + 8), j:(j + 8)])
             if is_grayscale:
-                compressed_image[i:(i + 8), j:(j + 8)] = quantizise_luminence(compressed_image[i:(i + 8), j:(j + 8)])
+                compressed_image[i:(i + 8), j:(j + 8)] = quantize_luminance(compressed_image[i:(i + 8), j:(j + 8)])
             else:
-                compressed_image[i:(i + 8), j:(j + 8)] = quantizise_chrominance(compressed_image[i:(i + 8), j:(j + 8)])
+                compressed_image[i:(i + 8), j:(j + 8)] = quantize_chrominance(compressed_image[i:(i + 8), j:(j + 8)])
 
     return compressed_image
 
 
-def decompress(compressed_image, is_colour):
+def decompress(compressed_image, is_greyscale):
     image_size = compressed_image.shape
     image = numpy.zeros(image_size)
 
     for i in r_[:image_size[0]:8]:
         for j in r_[:image_size[1]:8]:
-            image[i:(i + 8), j:(j + 8)] = inverse_dct_transformation(compressed_image[i:(i + 8), j:(j + 8)])
-
-    if is_colour:
-        r, b, g = ycrcb_to_rgb(image[:, :, 0], image[:, :, 1], image[:, :, 2])
-        image = rgb_to_image(r, g, b)
+            if is_greyscale:
+                image[i:(i + 8), j:(j + 8)] = dequantize_luminance(compressed_image[i:(i + 8), j:(j + 8)])
+            else:
+                image[i:(i + 8), j:(j + 8)] = dequantize_chrominance(compressed_image[i:(i + 8), j:(j + 8)])
+            image[i:(i + 8), j:(j + 8)] = inverse_dct_transformation(image[i:(i + 8), j:(j + 8)])
 
     return image
 
@@ -178,33 +192,27 @@ if __name__ == '__main__':
     rel_path = "images/i6.jpg"
     abs_file_path = os.path.join(script_dir, rel_path)
 
+    quality_factor = 100
+    quantization_luminance_matrix = numpy.maximum(numpy.floor((50 + quantization_luminance_matrix
+                                                               * (200 - 2 * quality_factor)) / 100), numpy.ones((8, 8)))
+    quantization_chrominance_matrix = numpy.maximum(numpy.floor((50 + quantization_chrominance_matrix
+                                                               * (200 - 2 * quality_factor)) / 100), numpy.ones((8, 8)))
+
     image = misc.imread(abs_file_path).astype(float)
     image_width = image.shape[1]
     image_height = image.shape[0]
-    is_colour = False
 
     if image_height % 8 != 0 or image_width % 8 != 0:
         image = crop_image(image, image_width, image_height)
 
-    if not image_is_grayscale(image):
-        result = compress_colour_image(image)
-        is_colour = True
+    if image_is_greyscale(image):
+        result = compress_greyscale_image(image)
     else:
-        result = compress_grayscale_image(image)
+        result = compress_colour_image(image)
 
-    a = decompress(result, is_colour)
-    toimage(a).show()
+    if image_is_greyscale(image):
+        final_result = decompress_greyscale_image(result)
+    else:
+        final_result = decompress_colour_image(result)
 
-
-    #test_hiding_row_by_row(quantizised_test_blocks[:, :, 0], message)
-
-
-    for values, color, channel in zip((r, g, b), ('red', 'green', 'blue'), (2,1,0)):
-          img = numpy.zeros((values.shape[0], values.shape[1], 3), dtype = values.dtype)
-          img[:,:,channel] = values
-          #toimage(img).show()
-
-
-
-
-
+    toimage(final_result).show()

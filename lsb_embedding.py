@@ -119,7 +119,7 @@ def lsb_matching_colour_dct_encode(cover_image, message, path):
                 if cover_image[y, x, z] == -1:
                     sign = -1
                 # add or subtract 1 from the LSB
-                cover_image[y, x, z] = int(bin(int(numpy.binary_repr(int(cover_image[y, x, z])), 2) + sign), 2)
+                cover_image[y, x, z] += sign
     except IndexError:
         pass
 

@@ -2,6 +2,7 @@ from secrets import randbelow
 from jpeg_compression import image_is_greyscale
 import numpy
 from numpy import random
+import cryptography
 from cryptography.fernet import Fernet
 import ast
 from numpy import r_

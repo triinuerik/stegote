@@ -2,7 +2,6 @@ import numpy
 from scipy.fftpack import dct, idct
 from numpy import r_
 
-
 quantization_luminance_matrix = numpy.array([
   [16,  11,  10,  16,  24,  40,  51,  61],
   [12,  12,  14,  19,  26,  58,  60,  55],
@@ -13,7 +12,6 @@ quantization_luminance_matrix = numpy.array([
   [49,  64,  78,  87, 103, 121, 120, 101],
   [72,  92,  95,  98, 112, 100, 103,  99]])
 
-
 quantization_chrominance_matrix = numpy.array([
   [17,  18,  24,  47,  99,  99,  99,  99],
   [18,  21,  26,  66,  99,  99,  99,  99],
@@ -23,6 +21,8 @@ quantization_chrominance_matrix = numpy.array([
   [99,  99,  99,  99,  99,  99,  99,  99],
   [99,  99,  99,  99,  99,  99,  99,  99],
   [99,  99,  99,  99,  99,  99,  99,  99]])
+
+zigzagged_image = list()
 
 
 def image_is_greyscale(image):
@@ -86,9 +86,9 @@ def image_to_rgb(image):
         numpy.ndarray: The red, green and blue channels.
     """
 
-    r = image[:, :, 2]
+    r = image[:, :, 0]
     g = image[:, :, 1]
-    b = image[:, :, 0]
+    b = image[:, :, 2]
     return r, g, b
 
 

@@ -72,6 +72,8 @@ def crop_image(image):
     image_height = image.shape[0]
     remainder_width = image_width % 8
     remainder_height = image_height % 8
+    if image_is_greyscale(image):
+        return image[0:image_height - remainder_height, 0:image_width - remainder_width]
     return image[0:image_height - remainder_height, 0:image_width - remainder_width, :]
 
 

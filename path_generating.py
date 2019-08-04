@@ -277,7 +277,7 @@ def generate_dct_path_from_key(dct_coefficients_image, key):
 
 def generate_all_available_coordinate_list(cover_image):
     """
-    Method for generating a permutation of all the available coordinates (for hiding) of a cover image.
+    Method  for generating a permutation of all the available coordinates (for hiding) of a cover image.
 
     Args:
         cover_image (numpy.ndarray): The cover image where the message could be hidden.

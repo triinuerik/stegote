@@ -23,6 +23,28 @@ To view a quick user manual of Stegote, navigate to the directory and enter:
 
 ```python main.py --help```
 
+<img width="640" alt="Screenshot 2019-07-15 at 12 52 13" src="https://user-images.githubusercontent.com/29357315/62554616-13401b00-b87a-11e9-9a74-f3b4c8296927.png">
+
+In order to encode a hidden message into a cover image, enter:
+
+```python main.py --encode```
+
+Answer the prompts to specify the manner of hiding, or use the flags to enter them straight on the command-line.
+
+<img width="584" alt="Screenshot 2019-07-16 at 12 49 17" src="https://user-images.githubusercontent.com/29357315/62554834-83e73780-b87a-11e9-8417-946fdbcb2bed.png">
+
+In order to decode a secret image to find the hidden message inside, enter:
+
+```python main.py --decode```
+
+NB! Be careful to decode the message in the same manner as it was encoded. 
+
+In order to generate a secret key, enter:
+
+```python main.py --generate_key```
+
+<img width="540" alt="Screenshot 2019-07-16 at 10 39 39" src="https://user-images.githubusercontent.com/29357315/62555003-d58fc200-b87a-11e9-974d-9b85dcdb3c1a.png">
+
 
 
 

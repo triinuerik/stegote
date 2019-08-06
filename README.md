@@ -15,7 +15,7 @@ To use the tool, the following libraries and packages needs to be installed:
 * Bitarray (https://pypi.org/project/bitarray/) - for bit to byte conversions
 * Secrets and Fernet from the Cryptography library (https://cryptography.io/en/latest/installation/) - for cryptography and secret key generation
 
-For every requirement except for jpeg, a free package manager tool is reccomended to use (eg. Anaconda). For the jpeg library, a short installation manual is provided in French and in its rough translation to English.
+For every requirement except for jpeg, a free package manager tool is reccomended to use (eg. Anaconda). For the jpeg library, a short installation manual is provided in wiki in French and in its rough translation to English (https://github.com/triinuerik/stegote/wiki/jpeg-library-installation-guide).
 
 ## Quick guide
 

@@ -48,6 +48,7 @@ def save_jpeg(secret_image, destination_path, file_name):
 
 def verify_and_initialize():
     global path, secret_message, destination_path, compression, encoding, embedding, secret_key, path_token
+    quality = 75
     if not args.encode and not args.decode:
         print("Please try again and input whether you want to encode or decode.")
         sys.exit()
@@ -73,7 +74,7 @@ def verify_and_initialize():
             destination_path = args.dest_path
     if not args.compression:
         compression = input(
-            "Do you want to encode/decode the message in JPEG compressed image (press Enter for default)? [y/n] ")
+            "Do you want to JPEG compress the image (press Enter for default)? [y/n] ")
     else:
         compression = args.compression
     if not compression:
@@ -81,16 +82,9 @@ def verify_and_initialize():
     if compression not in ["y", "n"]:
         print("Please try again and input a correct option for JPEG compression")
         sys.exit()
-    if compression == "y" and args.encode:
-        quality = input("Do you want to select the compression quality (press Enter for default)? [0 (lowest) - 100 (best)] ")
-        if not quality:
-            quality = 75
-        if quality not in range(0, 101):
-            print("Please try again and input a correct option for the compression quality")
-            sys.exit()
     if not args.encoding:
-        encoding = input("Do you want to use SIMPLE encoding, encoding using a shared KEY or encoding using a PATH token"
-                         "encrypted with the shared key? (press Enter for default)? [s/k/p] ")
+        encoding = input("Do you want to use SIMPLE encoding, encoding using a KEY or encoding using a PATH token"
+                         " encrypted with the shared key? (press Enter for default)? [s/k/p] ")
     else:
         encoding = args.encoding
     if not encoding:
@@ -111,12 +105,12 @@ def verify_and_initialize():
             sys.exit()
     if encoding == "k" or encoding == "p":
         if not args.key:
-            secret_key = input("Input the shared secret key: ")
+            secret_key = input("Input the secret key: ")
         else:
             secret_key = args.key
         secret_key = secret_key.encode("utf-8")
         if not secret_key:
-            print("Please try again and input the shared secret key")
+            print("Please try again and input the secret key")
             sys.exit()
     if args.decode and encoding == "p":
         if not args.path_token:
@@ -232,7 +226,7 @@ if __name__ == '__main__':
     parser.add_argument('--dest_path',
                         help="Destination folder path to save the secret image")
     parser.add_argument('--generate_key',
-                        help="Enter this argument to generate a shared secret key.",
+                        help="Enter this argument to generate a secret key.",
                         action='store_true')
     parser.add_argument('--encode',
                         help="Enter this argument to encode a message into an image.",
